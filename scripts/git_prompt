@@ -1,0 +1,43 @@
+
+# This script sets up the PS1 prompt.
+# Should be included in your .bash_profile
+# The prompt includes the following information:
+#   <hostname> [<git repo>:<current branch>] <current workdirbase> $
+
+function git-branch-name {
+    git symbolic-ref HEAD 2>/dev/null | cut -d"/" -f 3
+}
+
+function git-branch-prompt {
+  local branch=`git-branch-name`
+  if [ $branch ]; then printf " [%s]" $branch; fi
+}
+
+function git-root-name {
+    basename `git rev-parse --show-toplevel 2> /dev/null` 2> /dev/null
+}
+
+function git-root-prompt {
+  local root=`git-root-name`
+  if [ $root ]; then printf "%s" $root; fi
+}
+
+function git-repo-branch-prompt {
+  local repo=`git-root-name`
+  local branch=`git-branch-name`
+  local repo_branch=''
+
+  # Notes:
+  # \e[0;35m  -- marks beginning of color scheme
+  # \e[m -- marks end of color scheme
+
+  if [ $repo ] || [ $branch]; then
+      printf "[\e[0;35m%s\e[m:\e[0;36m%s\e[m]" $repo $branch
+  else
+      printf ""
+  fi
+
+}
+
+export PS1="\\[@\h \$(git-repo-branch-prompt) \e[0;32m\W\e[m \$ "
+
